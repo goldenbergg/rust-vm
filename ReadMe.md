@@ -1,4 +1,6 @@
-# To Implement
+# Continutation of Parser/Virtual Machine Project for ECE-39595 in Rust
 
-- [ ] Trait for Stmt
-- [ ] Refactor add and exec functions to replace repetitive code
+## To Implement
+- [ ] Implement traits for Stmt implementation
+- [X] Refactor add and exec functions to call helper to eleminate repetitive
+      code
