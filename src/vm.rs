@@ -260,6 +260,8 @@ impl VM {
         let top = self.rt_stack.top_val();
         self.out_file.as_ref().unwrap().write(&top.to_string().as_bytes())
             .expect("error: issue writing to output file");
+        self.out_file.as_ref().unwrap().write("\n".as_bytes())
+            .expect("error: issue writing to output file");
         self.pc += 1;
         println!("OP_PRINTTOS executed");
     }
@@ -279,6 +281,8 @@ impl VM {
             .get_instr(self.pc as usize).get_operand() as usize;
         let str = self.str_buf.as_ref().unwrap().get_str(operand);
         self.out_file.as_ref().unwrap().write(str.as_bytes())
+            .expect("error: issue writing to output file");
+        self.out_file.as_ref().unwrap().write("\n".as_bytes())
             .expect("error: issue writing to output file");
         self.pc += 1;
         println!("OP_PRINTS executed");
