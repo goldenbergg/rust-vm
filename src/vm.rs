@@ -80,6 +80,9 @@ impl VM {
         self.add_opcode(false, 0x00000032, VM::add_pop_instr);
         self.add_opcode(false, 0x00000041, VM::add_swap_instr);
         self.add_opcode(false, 0x00000010, VM::add_jump_instr);
+        self.add_opcode(false, 0x00000013, VM::add_gosub_instr);
+        self.add_opcode(false, 0x00000014, VM::add_return_instr);
+        self.add_opcode(false, 0x00000015, VM::add_enter_sub_instr);
     }
 
     fn fill_fn_map_exec(&mut self) {
@@ -96,6 +99,9 @@ impl VM {
         self.add_opcode(true, 0x00000032, VM::exec_pop_instr);
         self.add_opcode(true, 0x00000041, VM::exec_swap_instr);
         self.add_opcode(true, 0x00000010, VM::exec_jump_instr);
+        self.add_opcode(true, 0x00000013, VM::exec_gosub_instr);
+        self.add_opcode(true, 0x00000014, VM::exec_return_instr);
+        self.add_opcode(true, 0x00000015, VM::exec_enter_sub_instr);
     }
 
     fn fill_instr_mem(&mut self) { 
@@ -286,6 +292,24 @@ impl VM {
         println!("OP_JUMP added");
     }
 
+    fn add_gosub_instr(&mut self) {
+        self.add_instr_with_operand(0x00000013, 
+            String::from("OP_GOSUB"));
+        println!("OP_GOSUB added");
+    }
+
+    fn add_return_instr(&mut self) {
+        self.add_instr_without_operand(0x00000014, 
+            String::from("OP_RETURN"));
+        println!("OP_RETURN added");
+    }
+
+    fn add_enter_sub_instr(&mut self) {
+        self.add_instr_with_operand(0x00000015, 
+            String::from("OP_ENTER_SUBROUTINE"));
+        println!("OP_ENTER_SUBROUTINE added");
+    }
+
     fn exec_start_prog_instr(&mut self) {
         self.pc += 1;
         println!("OP_START_PROGRAM executed");
@@ -394,5 +418,29 @@ impl VM {
             .get_instr(self.pc as usize).get_operand();
         self.pc = new_pc;
         println!("OP_JUMP executed");
+    }
+
+    fn exec_gosub_instr(&mut self) {
+        self.ret_addr_stack.push_addr(self.pc + 1);
+        let new_pc = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        self.pc = new_pc;
+        println!("OP_GOSUB executed");
+    }
+
+    fn exec_return_instr(&mut self) {
+        let new_pc = self.ret_addr_stack.top_addr();
+        self.pc = new_pc;
+        self.data_mem.as_mut().unwrap().pop_sub_mem();
+        self.ret_addr_stack.pop_addr();
+        println!("OP_RETURN executed");
+    }
+
+    fn exec_enter_sub_instr(&mut self) {
+        let operand = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        self.data_mem.as_mut().unwrap().push_sub_mem(operand as usize);
+        self.pc += 1;
+        println!("OP_ENTER_SUBROUTINE");
     }
 }
