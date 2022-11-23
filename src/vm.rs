@@ -103,6 +103,7 @@ impl VM {
         self.add_opcode(true, 0x00000013, VM::exec_gosub_instr);
         self.add_opcode(true, 0x00000014, VM::exec_return_instr);
         self.add_opcode(true, 0x00000015, VM::exec_enter_sub_instr);
+        self.add_opcode(true, 0x00000030, VM::exec_pop_scalar_instr);
     }
 
     fn fill_instr_mem(&mut self) { 
@@ -458,6 +459,6 @@ impl VM {
         self.data_mem.as_mut().unwrap().set_data(operand as usize, top);
         self.rt_stack.pop_val();
         self.pc += 1;
-        println!("OP_POPSCALAR executed")
+        println!("OP_POPSCALAR executed");
     }
 }
