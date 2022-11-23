@@ -74,6 +74,10 @@ impl VM {
         self.add_opcode(false, 0x00000050, VM::add_add_instr);
         self.add_opcode(false, 0x00000060, VM::add_prints_instr);
         self.add_opcode(false, 0x00000053, VM::add_div_instr);
+        self.add_opcode(false, 0x00000040, VM::add_dup_instr);
+        self.add_opcode(false, 0x00000052, VM::add_mul_instr);
+        self.add_opcode(false, 0x00000051, VM::add_negate_instr);
+        self.add_opcode(false, 0x00000032, VM::add_pop_instr);
     }
 
     fn fill_fn_map_exec(&mut self) {
@@ -84,6 +88,10 @@ impl VM {
         self.add_opcode(true, 0x00000050, VM::exec_add_instr);
         self.add_opcode(true, 0x00000060, VM::exec_prints_instr);
         self.add_opcode(true, 0x00000053, VM::exec_div_instr);
+        self.add_opcode(true, 0x00000040, VM::exec_dup_instr);
+        self.add_opcode(true, 0x00000052, VM::exec_mul_instr);
+        self.add_opcode(true, 0x00000051, VM::exec_negate_instr);
+        self.add_opcode(true, 0x00000032, VM::exec_pop_instr);
     }
 
     fn fill_instr_mem(&mut self) { 
@@ -238,6 +246,30 @@ impl VM {
         println!("OP_DIV added");
     }
 
+    fn add_dup_instr(&mut self) {
+        self.add_instr_without_operand(0x00000040, 
+            String::from("OP_DUP"));
+        println!("OP_DUP added");
+    }
+
+    fn add_mul_instr(&mut self) {
+        self.add_instr_without_operand(0x00000052, 
+            String::from("OP_MUL"));
+        println!("OP_MUL added");
+    }
+
+    fn add_negate_instr(&mut self) {
+        self.add_instr_without_operand(0x00000051, 
+            String::from("OP_NEGATE"));
+        println!("OP_NEGATE added");
+    }
+
+    fn add_pop_instr(&mut self) {
+        self.add_instr_without_operand(0x00000032, 
+            String::from("OP_POP"));
+        println!("OP_POP added");
+    }
+
     fn exec_start_prog_instr(&mut self) {
         self.pc += 1;
         println!("OP_START_PROGRAM executed");
@@ -296,5 +328,36 @@ impl VM {
         self.rt_stack.push_val(dividend / divisor);
         self.pc += 1;
         println!("OP_DIV executed");
+    }
+
+    fn exec_dup_instr(&mut self) {
+        let top = self.rt_stack.top_val();
+        self.rt_stack.push_val(top);
+        self.pc += 1;
+        println!("OP_DUP executed");
+    }
+
+    fn exec_mul_instr(&mut self) {
+        let multiplier = self.rt_stack.top_val();
+        self.rt_stack.pop_val();
+        let multiplicand = self.rt_stack.top_val();
+        self.rt_stack.pop_val();
+        self.rt_stack.push_val(multiplier * multiplicand);
+        self.pc += 1;
+        println!("OP_MUL executed");
+    }
+
+    fn exec_negate_instr(&mut self) {
+        let negate = 0 - self.rt_stack.top_val();
+        self.rt_stack.pop_val();
+        self.rt_stack.push_val(negate);
+        self.pc += 1;
+        println!("OP_NEGATE executed");
+    }
+
+    fn exec_pop_instr(&mut self) {
+        self.rt_stack.pop_val();
+        self.pc += 1;
+        println!("OP_POP executed");
     }
 }
