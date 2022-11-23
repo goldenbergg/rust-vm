@@ -83,6 +83,7 @@ impl VM {
         self.add_opcode(false, 0x00000013, VM::add_gosub_instr);
         self.add_opcode(false, 0x00000014, VM::add_return_instr);
         self.add_opcode(false, 0x00000015, VM::add_enter_sub_instr);
+        self.add_opcode(false, 0x00000030, VM::add_pop_scalar_instr);
     }
 
     fn fill_fn_map_exec(&mut self) {
@@ -310,6 +311,12 @@ impl VM {
         println!("OP_ENTER_SUBROUTINE added");
     }
 
+    fn add_pop_scalar_instr(&mut self) {
+        self.add_instr_with_operand(0x00000030, 
+            String::from("OP_POPSCALAR"));
+        println!("OP_POPSCALAR added");
+    }
+
     fn exec_start_prog_instr(&mut self) {
         self.pc += 1;
         println!("OP_START_PROGRAM executed");
@@ -441,6 +448,16 @@ impl VM {
             .get_instr(self.pc as usize).get_operand();
         self.data_mem.as_mut().unwrap().push_sub_mem(operand as usize);
         self.pc += 1;
-        println!("OP_ENTER_SUBROUTINE");
+        println!("OP_ENTER_SUBROUTINE executed");
+    }
+
+    fn exec_pop_scalar_instr(&mut self) {
+        let operand = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        let top = self.rt_stack.top_val();
+        self.data_mem.as_mut().unwrap().set_data(operand as usize, top);
+        self.rt_stack.pop_val();
+        self.pc += 1;
+        println!("OP_POPSCALAR executed")
     }
 }
