@@ -78,6 +78,8 @@ impl VM {
         self.add_opcode(false, 0x00000052, VM::add_mul_instr);
         self.add_opcode(false, 0x00000051, VM::add_negate_instr);
         self.add_opcode(false, 0x00000032, VM::add_pop_instr);
+        self.add_opcode(false, 0x00000041, VM::add_swap_instr);
+        self.add_opcode(false, 0x00000010, VM::add_jump_instr);
     }
 
     fn fill_fn_map_exec(&mut self) {
@@ -92,6 +94,8 @@ impl VM {
         self.add_opcode(true, 0x00000052, VM::exec_mul_instr);
         self.add_opcode(true, 0x00000051, VM::exec_negate_instr);
         self.add_opcode(true, 0x00000032, VM::exec_pop_instr);
+        self.add_opcode(true, 0x00000041, VM::exec_swap_instr);
+        self.add_opcode(true, 0x00000010, VM::exec_jump_instr);
     }
 
     fn fill_instr_mem(&mut self) { 
@@ -270,6 +274,18 @@ impl VM {
         println!("OP_POP added");
     }
 
+    fn add_swap_instr(&mut self) {
+        self.add_instr_without_operand(0x00000041, 
+            String::from("OP_SWAP"));
+        println!("OP_SWAP added");
+    }
+
+    fn add_jump_instr(&mut self) {
+        self.add_instr_with_operand(0x00000010, 
+            String::from("OP_JUMP"));
+        println!("OP_JUMP added");
+    }
+
     fn exec_start_prog_instr(&mut self) {
         self.pc += 1;
         println!("OP_START_PROGRAM executed");
@@ -294,6 +310,7 @@ impl VM {
             .expect("error: issue writing to output file");
         self.out_file.as_ref().unwrap().write("\n".as_bytes())
             .expect("error: issue writing to output file");
+        self.rt_stack.pop_val();
         self.pc += 1;
         println!("OP_PRINTTOS executed");
     }
@@ -359,5 +376,23 @@ impl VM {
         self.rt_stack.pop_val();
         self.pc += 1;
         println!("OP_POP executed");
+    }
+
+    fn exec_swap_instr(&mut self) {
+        let old_top = self.rt_stack.top_val();
+        self.rt_stack.pop_val();
+        let new_top = self.rt_stack.top_val();
+        self.rt_stack.pop_val();
+        self.rt_stack.push_val(old_top);
+        self.rt_stack.push_val(new_top);
+        self.pc += 1;
+        println!("OP_SWAP executed");
+    }
+
+    fn exec_jump_instr(&mut self) {
+        let new_pc = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        self.pc = new_pc;
+        println!("OP_JUMP executed");
     }
 }
