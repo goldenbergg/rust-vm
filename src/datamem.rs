@@ -12,7 +12,7 @@ impl DataMem {
     }
 
     pub fn get_data(&self, pos: usize) -> i32 {
-        if pos > (self.main_mem.capacity() - 1) {
+        if pos as i32 > (self.main_mem.capacity() as i32 - 1) {
             self.sub_mem.last().unwrap()[pos - self.main_mem.capacity()]
         } else {
             self.main_mem[pos]
@@ -20,10 +20,11 @@ impl DataMem {
     }
 
     pub fn set_data(&mut self, pos: usize, data: i32) {
-        if pos > (self.main_mem.capacity() - 1) {
-            self.sub_mem.last_mut().unwrap()[pos - self.main_mem.capacity()] = data;
+        if pos as i32 > (self.main_mem.capacity() as i32 - 1) {
+            self.sub_mem.last_mut().unwrap().insert(pos - 
+                self.main_mem.capacity(), data);
         } else {
-            self.main_mem[pos] = data;
+            self.main_mem.insert(pos, data);
         }
     }
 
