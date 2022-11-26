@@ -5,10 +5,13 @@ pub struct DataMem {
 
 impl DataMem {
     pub fn new(size: usize) -> DataMem {
-        DataMem {
+        let mut data_mem = DataMem {
             main_mem: Vec::with_capacity(size),
             sub_mem: Vec::new(),
-        }
+        };
+
+        data_mem.main_mem.resize(size, 0);
+        data_mem
     }
 
     pub fn get_data(&self, pos: usize) -> i32 {
@@ -30,6 +33,8 @@ impl DataMem {
 
     pub fn push_sub_mem(&mut self, size: usize) {
         self.sub_mem.push(Vec::with_capacity(size));
+        let pos = self.sub_mem.len() - 1;
+        self.sub_mem[pos].resize(size, 0);
     }
 
     pub fn pop_sub_mem(&mut self) {

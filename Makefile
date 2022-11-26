@@ -17,7 +17,7 @@ clean :
 	rm -f *.vout
 
 .PHONY : testall
-testall :
+testall : $(EXECUTABLE)
 	$(EXECUTABLE) my_parser_outs/1PushI.out && diff -w 1PushI.vout \
 	vm_outs/1PushI.vout
 	$(EXECUTABLE) my_parser_outs/2PrintTOS.out && diff -w 2PrintTOS.vout \

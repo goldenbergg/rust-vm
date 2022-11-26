@@ -85,6 +85,8 @@ impl VM {
         self.add_opcode(false, 0x00000015, VM::add_enter_sub_instr);
         self.add_opcode(false, 0x00000030, VM::add_pop_scalar_instr);
         self.add_opcode(false, 0x00000020, VM::add_push_scalar_instr);
+        self.add_opcode(false, 0x00000031, VM::add_pop_array_instr);
+        self.add_opcode(false, 0x00000021, VM::add_push_array_instr);
     }
 
     fn fill_fn_map_exec(&mut self) {
@@ -106,6 +108,8 @@ impl VM {
         self.add_opcode(true, 0x00000015, VM::exec_enter_sub_instr);
         self.add_opcode(true, 0x00000030, VM::exec_pop_scalar_instr);
         self.add_opcode(true, 0x00000020, VM::exec_push_scalar_instr);
+        self.add_opcode(true, 0x00000031, VM::exec_pop_array_instr);
+        self.add_opcode(true, 0x00000021, VM::exec_push_array_instr);
     }
 
     fn fill_instr_mem(&mut self) { 
@@ -221,19 +225,19 @@ impl VM {
     fn add_start_prog_instr(&mut self) {
         self.add_instr_with_operand(0x00000017, 
             String::from("OP_START_PROGRAM"));
-        // println!("OP_START_PROGRAM added");
+        println!("OP_START_PROGRAM added");
     }
 
     fn add_exit_instr(&mut self) {
         self.add_instr_without_operand(0x00000018, 
             String::from("OP_EXIT"));
-        // println!("OP_EXIT added");
+        println!("OP_EXIT added");
     }
 
     fn add_pushi_instr(&mut self) {
         self.add_instr_with_operand(0x00000022, 
             String::from("OP_PUSHI"));
-        // println!("OP_PUSHI added");
+        println!("OP_PUSHI added");
     }
 
     fn add_print_tos_instr(&mut self) {
@@ -326,14 +330,26 @@ impl VM {
         // println!("OP_PUSHSCALAR added");
     }
 
+    fn add_pop_array_instr(&mut self) {
+        self.add_instr_with_operand(0x00000031, 
+            String::from("OP_POPARRAY"));
+        println!("OP_POPARRARY added");
+    }
+
+    fn add_push_array_instr(&mut self) {
+        self.add_instr_with_operand(0x00000021, 
+            String::from("OP_PUSHARRAY"));
+        println!("OP_PUSHARRAY added");
+    }
+
     fn exec_start_prog_instr(&mut self) {
         self.pc += 1;
-        // println!("OP_START_PROGRAM executed");
+        println!("OP_START_PROGRAM executed");
     }
 
     fn exec_exit_prog_instr(&mut self) {
         self.pc += 1;
-        // println!("OP_EXIT executed");
+        println!("OP_EXIT executed");
     }
 
     fn exec_pushi_instr(&mut self) {
@@ -341,7 +357,7 @@ impl VM {
             get_instr(self.pc as usize).get_operand();
         self.rt_stack.push_val(operand);
         self.pc += 1;
-        // println!("OP_PUSHI executed");
+        println!("OP_PUSHI executed");
     }
 
     fn exec_print_tos_instr(&mut self) {
@@ -478,5 +494,30 @@ impl VM {
         self.rt_stack.push_val(data);
         self.pc += 1;
         // println!("OP_PUSHSCALAR executed");
+    }
+
+    fn exec_pop_array_instr(&mut self) {
+        let operand = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        let top = self.rt_stack.top_val();
+        let e = top + operand;
+        self.rt_stack.pop_val();
+        let top = self.rt_stack.top_val();
+        self.data_mem.as_mut().unwrap().set_data(e as usize, top);
+        self.rt_stack.pop_val();
+        self.pc += 1;
+        println!("OP_POPARRAY executed");
+    }
+
+    fn exec_push_array_instr(&mut self) {
+        let operand = self.instr_mem.as_ref().unwrap()
+            .get_instr(self.pc as usize).get_operand();
+        let top = self.rt_stack.top_val();
+        let e = operand + top;
+        self.rt_stack.pop_val();
+        let data = self.data_mem.as_ref().unwrap().get_data(e as usize);
+        self.rt_stack.push_val(data);
+        self.pc += 1;
+        println!("OP_PUSHARRAY executed");
     }
 }
